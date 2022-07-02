@@ -1,3 +1,4 @@
+
 import { combineReducers } from "redux";
 
 
@@ -5,16 +6,35 @@ const wallet = {
     isConnected : false,
     address : "",
     balance : 0,
+    chainId : 0,
+    issue : false,
 }
 
+
 const walletInfo = (wallet_ = wallet, action) => {
-    if(action.type === "CONNECT_WALLET") {
-        return action.payload
-    } else if (action.type == "GET_BALANCE") {
-        return action.payload
+    switch(action.type) {
+        case "CONNECT_WALLET" :
+        return {
+            ...wallet_,
+            isConnected : action.payload.isConnected,
+            address : action.payload.address,
+            chainId : action.payload.chainId,
+        }
+        case "GET_BALANCE" :
+        return {
+            ...wallet_,
+            balance : action.payload.balance,
+        }
+        case "SET_ISSUE" :
+        return {
+            ...wallet_,
+            issue : action.payload,
+        }
+        default : 
+            return wallet;
     }
-    return wallet_;
 }
+
 
 export default combineReducers({
     wallet : walletInfo,

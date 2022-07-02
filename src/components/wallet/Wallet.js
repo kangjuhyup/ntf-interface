@@ -1,24 +1,36 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import {connectWallet, getBalance } from '../../actions'
+import {connectWallet, getBalance, setIssue } from '../../actions'
+import { sleep } from '../../utils/timer'
+
+import { getBlockNum, issueNTF } from '../../service/web3';
 
 
 const Wallet = props => {
     useEffect(() => {
-        // console.log('useEffect')
-        getBalance_(props,props.wallet.address)
+        if(props.wallet.isConnected) {
+            getBalance_(props)
+        }
     },[props.wallet.isConnected])
     const wallet = props.wallet
     console.log('isConnected : ',window.ethereum.isConnected())
     return <div>{ wallet.isConnected 
-        ? <div><p>account : {wallet.address}</p><p>balance : {wallet.balance} </p><p>network : {wallet.chainId}</p></div>
+        ? <div>
+            <p>account : {wallet.address}</p>
+            <p>balance : {wallet.balance}</p>
+            <p>network : {wallet.chainId}</p>
+            <button onClick={()=>clickIssue(props)}>NTF 발행하기</button>
+        </div>
         : <button onClick={() => clickConnect(props)}>Connect Wallet</button> }
     </div>
 }
 
 const clickConnect = (props)  => {
-    console.log('click')
     getAccount(props)
+}
+
+const clickIssue = (props) => {
+    props.setIssue(true)
 }
 
 const getAccount = (props) => {
@@ -38,26 +50,22 @@ const getAccount = (props) => {
     }   
 }
 
-const getBalance_ = async (props,address) => {
+const getBalance_ = async (props) => {
     console.log('getBalance')
-    while(props.wallet.isConnected) {
-        window.ethereum.request({ method : 'eth_getBalance',params:[address]}).then((data) => {
-            console.log(data)
-            // props.getBalance({
-            //     balance : data,
-            // })
-        }).catch(error => console.log(error))
+    // while(props.wallet.isConnected) {
+    //     window.ethereum.request({ method : 'eth_getBalance',params:[props.wallet.address]}).then((data) => {
+    //         props.getBalance({
+    //             balance : data,
+    //         })
+    //     }).catch(error => console.log(error))
         
-        await sleep(3000)
-    }
+    //     await sleep(3000)
+    // }
 }
 
-const sleep = (ms) => {
-    return new Promise((r) => setTimeout(r,ms));
-}
 
 const mapStateToProps = state => {
     return {wallet : state.wallet}
 }
 
-export default connect(mapStateToProps, {connectWallet,})(Wallet)
+export default connect(mapStateToProps, {connectWallet,getBalance,setIssue})(Wallet)
